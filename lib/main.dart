@@ -1,10 +1,3 @@
-/*
- * purpose: App entrypoint for local login and product CRUD using SharedPreferences.
- * main callers: Flutter runtime (`main`) and widget navigation (`LoginPage`/`HomePage`).
- * key dependencies: `dart:convert`, `flutter/material.dart`, `shared_preferences`.
- * main/public functions: `main`, `ProductModel.toMap`, `ProductModel.fromMap`, `_HomePageState.loadProducts`, `_HomePageState.showForm`.
- * important side effects: Reads/writes local key-value storage and performs route replacement navigation.
- */
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
