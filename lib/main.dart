@@ -1,6 +1,14 @@
+// Purpose: Single-file Flutter product CRUD app with login and image upload.
+// Main callers: Flutter app entrypoint via main(), widget tests.
+// Key dependencies: Material, image_picker, SharedPreferences, dart:convert.
+// Main/public functions: main, ProductModel, LoginPage, HomePage, ProductDetailPage.
+// Side effects: Reads/writes login and product data in SharedPreferences; reads image bytes from selected files.
+
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -138,14 +146,21 @@ class ProductModel {
     required this.name,
     required this.price,
     required this.description,
+    required this.image,
   });
 
   final String name;
   final String price;
   final String description;
+  final String image;
 
   Map<String, String> toMap() {
-    return {'name': name, 'price': price, 'description': description};
+    return {
+      'name': name,
+      'price': price,
+      'description': description,
+      'image': image,
+    };
   }
 
   factory ProductModel.fromMap(Map<String, dynamic> map) {
@@ -153,6 +168,7 @@ class ProductModel {
       name: map['name'] as String? ?? '',
       price: map['price'] as String? ?? '',
       description: map['description'] as String? ?? '',
+      image: map['image'] as String? ?? '',
     );
   }
 }
@@ -227,91 +243,173 @@ class _HomePageState extends State<HomePage> {
     await saveProducts();
   }
 
+  Future<String> convertImageToBase64(XFile image) async {
+    final Uint8List bytes = await image.readAsBytes();
+    return base64Encode(bytes);
+  }
+
   Future<void> showForm({ProductModel? product, int? index}) async {
     final nameController = TextEditingController(text: product?.name ?? '');
     final priceController = TextEditingController(text: product?.price ?? '');
     final descriptionController = TextEditingController(
       text: product?.description ?? '',
     );
+    final imageController = TextEditingController(text: product?.image ?? '');
+    XFile? selectedImage;
+    final picker = ImagePicker();
+
+    Future<void> pickImage(StateSetter setDialogState) async {
+      final image = await picker.pickImage(source: ImageSource.gallery);
+      if (image == null) {
+        return;
+      }
+
+      setDialogState(() {
+        selectedImage = image;
+        imageController.text = image.path;
+      });
+    }
+
+    Widget buildPreviewImage() {
+      if (selectedImage != null) {
+        return FutureBuilder<Uint8List>(
+          future: selectedImage!.readAsBytes(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: CircularProgressIndicator(),
+              );
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Image.memory(
+                snapshot.data!,
+                width: 150,
+                height: 150,
+                fit: BoxFit.cover,
+              ),
+            );
+          },
+        );
+      }
+
+      if (product?.image.isNotEmpty ?? false) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Image.memory(
+            base64Decode(product!.image),
+            width: 150,
+            height: 150,
+            fit: BoxFit.cover,
+          ),
+        );
+      }
+
+      return const SizedBox.shrink();
+    }
 
     try {
       await showDialog<void>(
         context: context,
         builder: (dialogContext) {
-          return AlertDialog(
-            title: Text(index == null ? 'Tambah Produk' : 'Edit Produk'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nama Produk',
-                      border: OutlineInputBorder(),
-                    ),
+          return StatefulBuilder(
+            builder: (context, setDialogState) {
+              return AlertDialog(
+                title: Text(index == null ? 'Tambah Produk' : 'Edit Produk'),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Nama Produk',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: priceController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Harga',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: () => pickImage(setDialogState),
+                        icon: const Icon(Icons.image),
+                        label: const Text('Pilih Gambar'),
+                      ),
+                      buildPreviewImage(),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: descriptionController,
+                        maxLines: 3,
+                        decoration: const InputDecoration(
+                          labelText: 'Deskripsi',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: priceController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Harga',
-                      border: OutlineInputBorder(),
-                    ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text('Batal'),
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: descriptionController,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'Deskripsi',
-                      border: OutlineInputBorder(),
-                    ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final name = nameController.text.trim();
+                      final price = priceController.text.trim();
+                      final description = descriptionController.text.trim();
+
+                      if (name.isEmpty ||
+                          price.isEmpty ||
+                          description.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Semua data produk wajib diisi'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      var imageBase64 = product?.image ?? '';
+                      if (selectedImage != null) {
+                        imageBase64 = await convertImageToBase64(
+                          selectedImage!,
+                        );
+                      }
+
+                      imageController.text = imageBase64;
+                      final productData = ProductModel(
+                        name: name,
+                        price: price,
+                        description: description,
+                        image: imageController.text,
+                      );
+
+                      if (index == null) {
+                        await addProduct(productData);
+                      } else {
+                        await editProduct(index, productData);
+                      }
+
+                      if (!dialogContext.mounted) {
+                        return;
+                      }
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text('Simpan'),
                   ),
                 ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Batal'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  final name = nameController.text.trim();
-                  final price = priceController.text.trim();
-                  final description = descriptionController.text.trim();
-
-                  if (name.isEmpty || price.isEmpty || description.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Semua data produk wajib diisi'),
-                      ),
-                    );
-                    return;
-                  }
-
-                  final productData = ProductModel(
-                    name: name,
-                    price: price,
-                    description: description,
-                  );
-
-                  if (index == null) {
-                    await addProduct(productData);
-                  } else {
-                    await editProduct(index, productData);
-                  }
-
-                  if (!dialogContext.mounted) {
-                    return;
-                  }
-                  Navigator.pop(dialogContext);
-                },
-                child: const Text('Simpan'),
-              ),
-            ],
+              );
+            },
           );
         },
       );
@@ -319,6 +417,7 @@ class _HomePageState extends State<HomePage> {
       nameController.dispose();
       priceController.dispose();
       descriptionController.dispose();
+      imageController.dispose();
     }
   }
 
@@ -441,25 +540,55 @@ class _HomePageState extends State<HomePage> {
 
                           return Card(
                             child: ListTile(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProductDetailPage(product: product),
+                                  ),
+                                );
+                              },
                               title: Text(product.name),
-                              subtitle: Text(
-                                'Harga: ${product.price}\n${product.description}',
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 8),
+                                  product.image.isNotEmpty
+                                      ? Image.memory(
+                                          base64Decode(product.image),
+                                          width: 120,
+                                          height: 120,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : const Icon(Icons.image, size: 120),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Harga: ${product.price}\n${product.description}',
+                                  ),
+                                ],
                               ),
-                              leading: IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.green,
-                                ),
-                                onPressed: () {
-                                  showForm(product: product, index: index);
-                                },
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () => deleteProduct(index),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.green,
+                                    ),
+                                    onPressed: () {
+                                      showForm(product: product, index: index);
+                                    },
+                                  ),
+                                  const SizedBox(width: 10),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () => deleteProduct(index),
+                                  ),
+                                ],
                               ),
                             ),
                           );
@@ -468,6 +597,46 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class ProductDetailPage extends StatelessWidget {
+  const ProductDetailPage({required this.product, super.key});
+
+  final ProductModel product;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(product.name)),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              height: 250,
+              child: product.image.isNotEmpty
+                  ? Image.memory(base64Decode(product.image), fit: BoxFit.cover)
+                  : const Icon(Icons.image, size: 250),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              product.name,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Harga: ${product.price}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 12),
+            Text(product.description, style: const TextStyle(fontSize: 16)),
+          ],
         ),
       ),
     );
