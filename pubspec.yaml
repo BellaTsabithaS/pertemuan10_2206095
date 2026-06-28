@@ -1,6 +1,6 @@
-# Purpose: Flutter package manifest for product CRUD app dependencies.
+# Purpose: Flutter package manifest for the Flutter e-commerce UAS app.
 # Main callers: flutter pub get, flutter build, flutter test.
-# Key dependencies: flutter, shared_preferences, image_picker, flutter_test.
+# Key dependencies: flutter, http, provider, shared_preferences, hive, intl, notifications, flutter_test.
 # Main/public functions: declares app metadata, dependencies, assets, and SDK constraints.
 # Side effects: dependency changes update pubspec.lock and generated plugin registrants.
 
@@ -39,11 +39,17 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
+  cached_network_image: ^3.3.1
   cupertino_icons: ^1.0.8
+  flutter_local_notifications: ^17.2.4
+  flutter_rating_bar: ^4.0.1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
   http: ^1.2.2
+  intl: ^0.19.0
   provider: ^6.1.2
   shared_preferences: ^2.3.3
-  image_picker: ^1.2.2
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
