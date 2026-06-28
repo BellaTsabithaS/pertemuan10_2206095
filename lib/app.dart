@@ -1,6 +1,6 @@
 // Purpose: Root app widget, provider registration, and global theme wiring.
 // Main callers: main().
-// Key dependencies: MaterialApp, Provider, AuthProvider, ThemeProvider, AppTheme, SplashPage.
+// Key dependencies: MaterialApp, Provider, AuthProvider, ProductProvider, ThemeProvider, AppTheme, SplashPage.
 // Main/public functions: App.
 // Side effects: None.
 
@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import 'features/splash/splash_page.dart';
 import 'providers/auth_provider.dart';
+import 'providers/product_provider.dart';
 import 'providers/theme_provider.dart';
 import 'core/theme/app_theme.dart';
 
@@ -23,6 +24,7 @@ class App extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => AuthProvider()..checkLoginStatus(),
         ),
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
