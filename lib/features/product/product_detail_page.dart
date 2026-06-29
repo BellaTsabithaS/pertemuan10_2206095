@@ -1,6 +1,6 @@
 // Purpose: Product detail, review list, and review submission page.
 // Main callers: HomePage product card taps.
-// Key dependencies: ProductProvider, ProductModel, LoadingWidget, ErrorStateWidget, currency helper.
+// Key dependencies: CartProvider, ProductProvider, ProductModel, LoadingWidget, ErrorStateWidget, currency helper.
 // Main/public functions: ProductDetailPage.
 // Side effects: Fetches product detail/reviews and posts reviews through ProductProvider.
 
@@ -17,6 +17,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/error_state_widget.dart';
 import '../../core/widgets/loading_widget.dart';
 import '../../models/product_model.dart';
+import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -80,6 +81,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     }
   }
 
+  Future<void> _addToCart(ProductModel product) async {
+    final cart = context.read<CartProvider>();
+    final success = await cart.addToCart(product.id, 1);
+    if (!mounted) {
+      return;
+    }
+    if (success) {
+      showSuccessSnackBar(context, 'Produk ditambahkan ke keranjang.');
+    } else {
+      showErrorSnackBar(
+        context,
+        cart.errorMessage ?? 'Gagal menambahkan ke keranjang.',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ProductProvider>();
@@ -91,14 +108,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: FilledButton(
-            onPressed: product == null
-                ? null
-                : () {
-                    showInfoSnackBar(
-                      context,
-                      'Keranjang akan tersedia di module berikutnya.',
-                    );
-                  },
+            onPressed: product == null ? null : () => _addToCart(product),
             child: const Text('Tambah ke Keranjang'),
           ),
         ),

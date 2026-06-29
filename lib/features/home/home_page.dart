@@ -1,6 +1,6 @@
 // Purpose: Product catalog home page with search, category filter, sorting, and product grid.
 // Main callers: SplashPage, LoginPage.
-// Key dependencies: AuthProvider, ProductProvider, ProductCard, ProductDetailPage, ProfilePage.
+// Key dependencies: AuthProvider, CartProvider, ProductProvider, ProductCard, CartPage, ProductDetailPage, ProfilePage.
 // Main/public functions: HomePage.
 // Side effects: Fetches products/categories through ProductProvider and can trigger logout.
 
@@ -13,7 +13,9 @@ import '../../core/widgets/error_state_widget.dart';
 import '../../core/widgets/loading_widget.dart';
 import '../../core/widgets/product_card.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
+import '../cart/cart_page.dart';
 import '../product/product_detail_page.dart';
 import '../profile/profile_page.dart';
 
@@ -56,11 +58,25 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final productProvider = context.watch<ProductProvider>();
+    final cartItems = context.watch<CartProvider>().totalItems;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Toko'),
         actions: [
+          IconButton(
+            tooltip: 'Keranjang',
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const CartPage()));
+            },
+            icon: Badge(
+              isLabelVisible: cartItems > 0,
+              label: Text('$cartItems'),
+              child: const Icon(Icons.shopping_bag_outlined),
+            ),
+          ),
           IconButton(
             tooltip: 'Profil',
             onPressed: () {

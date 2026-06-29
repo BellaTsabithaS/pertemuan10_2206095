@@ -1,7 +1,7 @@
 // Purpose: Cart item model for cart and order item rows.
 // Main callers: CartProvider, OrderModel, CartPage, OrderDetailPage.
 // Key dependencies: ProductModel.
-// Main/public functions: CartItemModel, CartItemModel.fromJson, subtotal.
+// Main/public functions: CartItemModel, CartItemModel.fromJson, copyWith, subtotal.
 // Side effects: None.
 
 import 'product_model.dart';
@@ -18,6 +18,14 @@ class CartItemModel {
   final int quantity;
 
   num get subtotal => product.price * quantity;
+
+  CartItemModel copyWith({String? id, ProductModel? product, int? quantity}) {
+    return CartItemModel(
+      id: id ?? this.id,
+      product: product ?? this.product,
+      quantity: quantity ?? this.quantity,
+    );
+  }
 
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
     final productJson = json['product'];
