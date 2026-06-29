@@ -1,8 +1,8 @@
-// Purpose: Cart page for listing cart items, editing quantities, removing items, clearing cart, and showing total.
+// Purpose: Cart page for listing cart items, editing quantities, removing items, clearing cart, total, and checkout navigation.
 // Main callers: HomePage cart action, product flow navigation.
-// Key dependencies: CartProvider, CartItemModel, EmptyStateWidget, LoadingWidget, currency helper.
+// Key dependencies: CartProvider, CartItemModel, CheckoutPage, EmptyStateWidget, LoadingWidget, currency helper.
 // Main/public functions: CartPage.
-// Side effects: Fetches and mutates cart data through CartProvider.
+// Side effects: Fetches and mutates cart data through CartProvider and navigates to checkout.
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +17,7 @@ import '../../core/widgets/error_state_widget.dart';
 import '../../core/widgets/loading_widget.dart';
 import '../../models/cart_item_model.dart';
 import '../../providers/cart_provider.dart';
+import '../checkout/checkout_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -140,9 +141,10 @@ class _CartPageState extends State<CartPage> {
                       onPressed: cart.isUpdating
                           ? null
                           : () {
-                              showInfoSnackBar(
-                                context,
-                                'Checkout akan tersedia di module berikutnya.',
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const CheckoutPage(),
+                                ),
                               );
                             },
                       child: const Text('Checkout'),

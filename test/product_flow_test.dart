@@ -53,7 +53,7 @@ void main() {
       expect(products.single.name, 'Laptop');
       expect(
         api.lastPath,
-        '/products?search=laptop&category=c1&sort=price_asc&page=2',
+        '/products?search=laptop&category_id=c1&sort=price_asc&page=2',
       );
     },
   );

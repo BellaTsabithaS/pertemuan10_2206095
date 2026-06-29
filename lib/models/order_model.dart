@@ -1,5 +1,5 @@
 // Purpose: Order data model for checkout, history, and detail screens.
-// Main callers: OrderProvider, OrderHistoryPage, OrderDetailPage.
+// Main callers: OrderService, OrderProvider, OrderHistoryPage, OrderDetailPage.
 // Key dependencies: CartItemModel.
 // Main/public functions: OrderModel, OrderModel.fromJson, displayNumber.
 // Side effects: None.
@@ -28,7 +28,7 @@ class OrderModel {
   String get displayNumber => id.length <= 8 ? id : id.substring(0, 8);
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
-    final rawItems = json['items'];
+    final rawItems = json['items'] ?? json['order_items'];
     final items = rawItems is List
         ? rawItems
               .whereType<Map<String, dynamic>>()
@@ -51,7 +51,7 @@ class OrderModel {
         '${json['created_at'] ?? json['createdAt'] ?? ''}',
       ),
       address: '${json['address'] ?? json['shipping_address'] ?? ''}',
-      note: '${json['note'] ?? ''}',
+      note: '${json['note'] ?? json['notes'] ?? ''}',
       items: items,
     );
   }

@@ -22,7 +22,7 @@ class ProductService {
     final query = Uri(
       queryParameters: {
         if (search.isNotEmpty) 'search': search,
-        if (category.isNotEmpty) 'category': category,
+        if (category.isNotEmpty) 'category_id': category,
         if (sort.isNotEmpty) 'sort': sort,
         'page': '$page',
       },
