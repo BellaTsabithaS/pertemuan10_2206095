@@ -34,4 +34,11 @@ void main() {
     final border = shape as RoundedRectangleBorder;
     expect(border.borderRadius, BorderRadius.circular(AppRadius.lg));
   });
+
+  test('navigation bar uses app theme surface token', () {
+    final theme = AppTheme.light;
+
+    expect(theme.navigationBarTheme.backgroundColor, AppColors.canvas);
+    expect(theme.navigationBarTheme.elevation, 0);
+  });
 }

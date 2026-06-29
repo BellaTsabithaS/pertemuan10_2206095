@@ -1,4 +1,13 @@
+<!--
+  Purpose: Declares release Android app permissions and launcher activity.
+  Main callers: Android package manager and Flutter Android embedding.
+  Key dependencies: Flutter MainActivity, generated applicationName, launcher resources.
+  Main/public functions: Defines app manifest, INTERNET permission, launcher intent.
+  Side effects: Grants release APK network access for HTTP API calls; no DB or file I/O.
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:label="flutter_toko"
         android:name="${applicationName}"

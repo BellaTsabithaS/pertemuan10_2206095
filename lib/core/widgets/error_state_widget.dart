@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 
@@ -26,7 +27,7 @@ class ErrorStateWidget extends StatelessWidget {
             Text(
               'Terjadi kendala',
               style: AppTextStyles.bodyStrong.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
+                color: context.color.ink,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -34,7 +35,7 @@ class ErrorStateWidget extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: AppTextStyles.caption.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: context.color.inkMuted80,
               ),
             ),
             if (onRetry != null) ...[

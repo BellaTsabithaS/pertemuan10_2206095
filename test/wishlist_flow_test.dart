@@ -47,6 +47,7 @@ void main() {
     categoryId: 'c1',
     categoryName: 'Elektronik',
     stock: 5,
+    isActive: true,
     rating: 4.5,
     reviewCount: 2,
   );

@@ -1,11 +1,18 @@
-// Purpose: Auth/profile REST service for customer account flows.
+// Purpose: Auth/profile REST service for customer and admin account flows.
 // Main callers: AuthProvider.
 // Key dependencies: ApiService, UserModel.
-// Main/public functions: register, login, getProfile, updateProfile.
+// Main/public functions: AuthLoginResult, register, login, getProfile, updateProfile.
 // Side effects: Performs HTTP requests through ApiService.
 
 import '../../models/user_model.dart';
 import 'api_service.dart';
+
+class AuthLoginResult {
+  const AuthLoginResult({required this.token, required this.user});
+
+  final String token;
+  final UserModel? user;
+}
 
 class AuthService {
   AuthService({ApiService? api}) : _api = api ?? ApiService();
@@ -19,14 +26,21 @@ class AuthService {
     );
   }
 
-  Future<String> login(String email, String password) async {
+  Future<AuthLoginResult> login(String email, String password) async {
     final response = await _api.post(
       '/auth/login',
       body: {'email': email, 'password': password},
     );
     final data = _asMap(response);
     final nested = _asMap(data['data']);
-    return '${nested['access_token'] ?? nested['token'] ?? data['access_token'] ?? data['token'] ?? ''}';
+    final user = _asMap(nested['user']).isNotEmpty
+        ? UserModel.fromJson(_asMap(nested['user']))
+        : null;
+    return AuthLoginResult(
+      token:
+          '${nested['access_token'] ?? nested['token'] ?? data['access_token'] ?? data['token'] ?? ''}',
+      user: user,
+    );
   }
 
   Future<UserModel> getProfile() async {

@@ -1,5 +1,5 @@
 // Purpose: Shared product card for catalog and wishlist grids.
-// Main callers: HomePage, WishlistPage.
+// Main callers: HomePage (_CatalogView), WishlistPage.
 // Key dependencies: CachedNetworkImage, ProductModel, currency helper, design tokens.
 // Main/public functions: ProductCard.
 // Side effects: Invokes tap callbacks for navigation and wishlist toggles.
@@ -30,75 +30,231 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  tooltip: isWishlisted ? 'Hapus wishlist' : 'Tambah wishlist',
-                  onPressed: onWishlistTap,
-                  icon: Icon(
-                    isWishlisted ? Icons.favorite : Icons.favorite_border,
-                    color: isWishlisted ? AppColors.statusCancelled : null,
+    final isOutOfStock = product.stock == 0;
+
+    return GestureDetector(
+      onTap: isOutOfStock ? null : onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: context.color.canvas,
+          borderRadius: AppRadius.circular(AppRadius.md),
+          border: Border.all(color: context.color.hairline),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- Image area ---
+            Expanded(
+              flex: 5,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Product image
+                  _ProductImage(
+                    imageUrl: product.imageUrl,
+                    isOutOfStock: isOutOfStock,
                   ),
-                ),
-              ),
-              Expanded(
-                child: Center(
-                  child: product.imageUrl.isEmpty
-                      ? const Icon(Icons.image_outlined, size: 64)
-                      : CachedNetworkImage(
-                          imageUrl: product.imageUrl,
-                          fit: BoxFit.contain,
-                          placeholder: (_, _) =>
-                              const CircularProgressIndicator(),
-                          errorWidget: (_, _, _) =>
-                              const Icon(Icons.broken_image_outlined, size: 64),
+
+                  // Wishlist button overlay (top right)
+                  Positioned(
+                    top: AppSpacing.xs,
+                    right: AppSpacing.xs,
+                    child: _WishlistButton(
+                      isWishlisted: isWishlisted,
+                      onTap: onWishlistTap,
+                    ),
+                  ),
+
+                  // Out of stock overlay
+                  if (isOutOfStock)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.xxs,
                         ),
+                        color: context.color.ink.withValues(alpha: 0.55),
+                        child: Text(
+                          'Stok Habis',
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.finePrint.copyWith(
+                            color: context.color.onDark,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            // --- Info area ---
+            Expanded(
+              flex: 4,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.sm,
+                  AppSpacing.sm,
+                  AppSpacing.sm,
+                  AppSpacing.sm,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Category badge
+                    if (product.categoryName.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
+                        child: Text(
+                          product.categoryName.toUpperCase(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.finePrint.copyWith(
+                            color: context.color.primary,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+
+                    // Product name
+                    Text(
+                      product.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.caption.copyWith(
+                        color: context.color.ink,
+                        fontWeight: FontWeight.w500,
+                        height: 1.3,
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // Price + stock row
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            formatRupiah(product.price),
+                            style: AppTextStyles.captionStrong.copyWith(
+                              color: context.color.ink,
+                            ),
+                          ),
+                        ),
+                        if (!isOutOfStock && product.stock <= 5)
+                          Text(
+                            'Sisa ${product.stock}',
+                            style: AppTextStyles.finePrint.copyWith(
+                              color: context.color.statusPending,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                product.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.bodyStrong.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Image widget with placeholder and error fallback.
+class _ProductImage extends StatelessWidget {
+  const _ProductImage({
+    required this.imageUrl,
+    required this.isOutOfStock,
+  });
+
+  final String imageUrl;
+  final bool isOutOfStock;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColorFiltered(
+      colorFilter: isOutOfStock
+          ? const ColorFilter.matrix(<double>[
+              0.2126, 0.7152, 0.0722, 0, 0,
+              0.2126, 0.7152, 0.0722, 0, 0,
+              0.2126, 0.7152, 0.0722, 0, 0,
+              0,      0,      0,      1, 0,
+            ])
+          : const ColorFilter.mode(Colors.transparent, BlendMode.color),
+      child: imageUrl.isEmpty
+          ? Container(
+              color: context.color.canvasParchment,
+              child: Center(
+                child: Icon(
+                  Icons.image_outlined,
+                  size: 40,
+                  color: context.color.inkMuted48,
                 ),
               ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                formatRupiah(product.price),
-                style: AppTextStyles.body.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
+            )
+          : CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.cover,
+              placeholder: (_, _) => Container(
+                color: context.color.canvasParchment,
+                child: Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: context.color.inkMuted48,
+                    ),
+                  ),
                 ),
               ),
-              if (product.categoryName.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xxs,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.hairline),
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                  ),
-                  child: Text(
-                    product.categoryName,
-                    style: AppTextStyles.caption,
+              errorWidget: (_, _, _) => Container(
+                color: context.color.canvasParchment,
+                child: Center(
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    size: 40,
+                    color: context.color.inkMuted48,
                   ),
                 ),
-              ],
-            ],
-          ),
+              ),
+            ),
+    );
+  }
+}
+
+// Circular wishlist button with semi-transparent background.
+class _WishlistButton extends StatelessWidget {
+  const _WishlistButton({
+    required this.isWishlisted,
+    required this.onTap,
+  });
+
+  final bool isWishlisted;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          color: context.color.canvas.withValues(alpha: 0.85),
+          shape: BoxShape.circle,
+          border: Border.all(color: context.color.hairline),
+        ),
+        child: Icon(
+          isWishlisted ? Icons.favorite : Icons.favorite_border,
+          size: 16,
+          color: isWishlisted ? context.color.statusCancelled : context.color.inkMuted48,
         ),
       ),
     );

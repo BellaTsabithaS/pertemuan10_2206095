@@ -1,6 +1,6 @@
 // Purpose: Root app widget, provider registration, and global theme wiring.
 // Main callers: main().
-// Key dependencies: MaterialApp, Provider, AuthProvider, CartProvider, OrderProvider, ProductProvider, ThemeProvider, WishlistProvider, AppTheme, SplashPage.
+// Key dependencies: MaterialApp, Provider, AdminProvider, AuthProvider, CartProvider, OrderProvider, ProductProvider, ThemeProvider, WishlistProvider, AppTheme, SplashPage.
 // Main/public functions: App.
 // Side effects: Starts auth/theme/wishlist state loading through providers.
 
@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'features/splash/splash_page.dart';
+import 'providers/admin_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/order_provider.dart';
@@ -24,6 +25,7 @@ class App extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()..loadTheme()),
+        ChangeNotifierProvider(create: (_) => AdminProvider()),
         ChangeNotifierProvider(
           create: (_) => AuthProvider()..checkLoginStatus(),
         ),

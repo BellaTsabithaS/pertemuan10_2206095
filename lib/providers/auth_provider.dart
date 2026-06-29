@@ -1,5 +1,5 @@
-// Purpose: Auth state provider for login, register, profile, and logout flows.
-// Main callers: App, SplashPage, LoginPage, RegisterPage, ProfilePage.
+// Purpose: Auth state provider for login, register, profile, role routing, and logout flows.
+// Main callers: App, SplashPage, LoginPage, RegisterPage, ProfilePage, AdminHomePage.
 // Key dependencies: ChangeNotifier, AuthService, StorageService, AppException.
 // Main/public functions: checkLoginStatus, register, login, logout, getProfile, updateProfile.
 // Side effects: Reads/writes auth token and performs auth/profile HTTP calls.
@@ -59,12 +59,14 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> login(String email, String password) async {
     return _run(() async {
-      final accessToken = await _authService.login(email, password);
+      final result = await _authService.login(email, password);
+      final accessToken = result.token;
       if (accessToken.isEmpty) {
         throw const AppException('Token login tidak ditemukan.');
       }
       _token = accessToken;
       await _storage.saveToken(accessToken);
+      _user = result.user ?? await _authService.getProfile();
     });
   }
 

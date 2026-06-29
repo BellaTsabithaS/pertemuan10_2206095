@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 
@@ -35,7 +36,7 @@ class EmptyStateWidget extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: AppTextStyles.bodyStrong.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
+                color: context.color.ink,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -43,7 +44,7 @@ class EmptyStateWidget extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: AppTextStyles.caption.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: context.color.inkMuted80,
               ),
             ),
             if (actionLabel != null && onAction != null) ...[

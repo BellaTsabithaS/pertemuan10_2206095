@@ -1,3 +1,8 @@
+// Purpose: Configures Android app module for Flutter debug/release builds.
+// Main callers: Flutter Gradle tool via assembleDebug/assembleRelease.
+// Key dependencies: Android Gradle plugin, Kotlin Android plugin, Flutter Gradle plugin, desugar_jdk_libs.
+// Main/public functions: declares android, flutter, and dependency configuration blocks.
+// Side effects: reads Flutter/Android build settings and resolves Gradle dependencies; no DB, HTTP, or file I/O at runtime.
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -13,6 +18,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -41,4 +47,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

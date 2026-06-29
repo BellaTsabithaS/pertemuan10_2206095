@@ -1,6 +1,6 @@
-// Purpose: Startup gate that chooses login or authenticated home based on auth state.
+// Purpose: Startup gate that chooses login, customer home, or admin home based on auth state.
 // Main callers: App MaterialApp.home.
-// Key dependencies: AuthProvider, LoginPage, HomePage, LoadingWidget.
+// Key dependencies: AuthProvider, LoginPage, HomePage, AdminHomePage, LoadingWidget.
 // Main/public functions: SplashPage.
 // Side effects: None.
 
@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/widgets/loading_widget.dart';
 import '../../providers/auth_provider.dart';
+import '../admin/admin_home_page.dart';
 import '../auth/login_page.dart';
 import '../home/home_page.dart';
 
@@ -24,6 +25,9 @@ class SplashPage extends StatelessWidget {
         }
 
         if (authProvider.isAuthenticated) {
+          if (authProvider.user?.isAdmin == true) {
+            return const AdminHomePage();
+          }
           return const HomePage();
         }
 

@@ -6,7 +6,9 @@
 
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
+import '../theme/app_text_styles.dart';
 
 class LoadingWidget extends StatelessWidget {
   const LoadingWidget({super.key, this.message});
@@ -21,10 +23,16 @@ class LoadingWidget extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(),
+            CircularProgressIndicator(color: context.color.primary),
             if (message != null) ...[
               const SizedBox(height: AppSpacing.md),
-              Text(message!, textAlign: TextAlign.center),
+              Text(
+                message!,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.caption.copyWith(
+                  color: context.color.inkMuted80,
+                ),
+              ),
             ],
           ],
         ),

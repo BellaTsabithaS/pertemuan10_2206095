@@ -6,6 +6,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../order/order_history_page.dart';
@@ -16,41 +18,92 @@ class OrderSuccessPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pesanan Berhasil')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.check_circle_outline, size: 72),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              'Pesanan berhasil dibuat',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodyStrong.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
+      backgroundColor: AppColors.canvas,
+      appBar: AppBar(
+        backgroundColor: AppColors.canvas,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false, // Prevent back navigation manually
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xxl),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Icon
+              const Icon(
+                Icons.check_circle,
+                size: 96,
+                color: AppColors.statusDelivered,
               ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            const Text(
-              'Cek riwayat pesanan untuk melihat status dan detail pesanan.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const OrderHistoryPage()),
-                );
-              },
-              child: const Text('Lihat Riwayat'),
-            ),
-            TextButton(
-              onPressed: () =>
-                  Navigator.of(context).popUntil((route) => route.isFirst),
-              child: const Text('Kembali ke Toko'),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.xl),
+              
+              // Text
+              Text(
+                'Pesanan Berhasil!',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.displayLarge.copyWith(
+                  color: AppColors.ink,
+                  fontSize: 28,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Terima kasih telah berbelanja.\nCek riwayat pesanan untuk melihat status dan detail.',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.body.copyWith(
+                  color: AppColors.inkMuted80,
+                  height: 1.5,
+                ),
+              ),
+              
+              const SizedBox(height: 48),
+
+              // Actions
+              FilledButton(
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (_) => const OrderHistoryPage()),
+                  );
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.onPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: AppRadius.circular(AppRadius.sm),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Lihat Riwayat Pesanan',
+                  style: AppTextStyles.bodyStrong.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              TextButton(
+                onPressed: () =>
+                    Navigator.of(context).popUntil((route) => route.isFirst),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.inkMuted80,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: AppRadius.circular(AppRadius.sm),
+                  ),
+                ),
+                child: Text(
+                  'Kembali ke Beranda',
+                  style: AppTextStyles.bodyStrong.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

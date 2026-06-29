@@ -24,6 +24,10 @@ class ReviewService {
     );
   }
 
+  Future<void> deleteReview(String reviewId) async {
+    await _api.delete('/reviews/$reviewId');
+  }
+
   List<Map<String, dynamic>> _extractList(dynamic response) {
     if (response is List) {
       return response.whereType<Map<String, dynamic>>().toList();

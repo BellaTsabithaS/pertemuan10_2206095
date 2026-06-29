@@ -31,7 +31,7 @@ class ProductProvider extends ChangeNotifier {
   bool isLoadingMore = false;
   String searchQuery = '';
   String selectedCategory = '';
-  String selectedSort = '';
+  String selectedSort = 'newest';
   int currentPage = 1;
   bool hasMore = true;
   String? errorMessage;
@@ -143,6 +143,22 @@ class ProductProvider extends ChangeNotifier {
       return false;
     } catch (_) {
       errorMessage = 'Gagal menambahkan ulasan.';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteReview(String productId, String reviewId) async {
+    try {
+      await _reviewService.deleteReview(reviewId);
+      await fetchProductReviews(productId);
+      return true;
+    } on AppException catch (error) {
+      errorMessage = error.message;
+      notifyListeners();
+      return false;
+    } catch (_) {
+      errorMessage = 'Gagal menghapus ulasan.';
       notifyListeners();
       return false;
     }

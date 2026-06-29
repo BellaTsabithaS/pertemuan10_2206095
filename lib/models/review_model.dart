@@ -7,6 +7,7 @@
 class ReviewModel {
   const ReviewModel({
     required this.id,
+    required this.userId,
     required this.userName,
     required this.rating,
     required this.comment,
@@ -14,6 +15,7 @@ class ReviewModel {
   });
 
   final String id;
+  final String userId;
   final String userName;
   final num rating;
   final String comment;
@@ -25,6 +27,7 @@ class ReviewModel {
 
     return ReviewModel(
       id: '${json['id'] ?? ''}',
+      userId: '${userMap['id'] ?? json['user_id'] ?? ''}',
       userName: '${userMap['name'] ?? json['user_name'] ?? ''}',
       rating: json['rating'] is num
           ? json['rating'] as num

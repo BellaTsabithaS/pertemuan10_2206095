@@ -84,6 +84,13 @@ class AppTheme {
           side: const BorderSide(color: AppColors.hairline),
         ),
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: surface,
+        indicatorColor: AppColors.primary.withValues(
+          alpha: brightness == Brightness.dark ? 0.24 : 0.14,
+        ),
+        elevation: 0,
+      ),
     );
   }
 }
