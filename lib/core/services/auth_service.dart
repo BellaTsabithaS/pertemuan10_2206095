@@ -15,7 +15,7 @@ class AuthService {
   Future<void> register(String name, String email, String password) async {
     await _api.post(
       '/auth/register',
-      body: {'name': name, 'email': email, 'password': password},
+      body: {'email': email, 'password': password, 'full_name': name},
     );
   }
 
@@ -37,7 +37,7 @@ class AuthService {
   Future<UserModel> updateProfile(String name, String phone) async {
     final response = await _api.put(
       '/auth/profile',
-      body: {'name': name, 'phone': phone},
+      body: {'full_name': name, 'phone': phone},
     );
     return UserModel.fromJson(_extractData(response));
   }

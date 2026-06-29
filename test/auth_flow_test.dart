@@ -64,6 +64,46 @@ void main() {
     },
   );
 
+  test(
+    'AuthService register posts full_name payload required by API',
+    () async {
+      final api = FakeApiService()
+        ..nextResponse = {'success': true, 'message': 'Registrasi berhasil.'};
+      final service = AuthService(api: api);
+
+      await service.register('John Doe', 'user@example.com', 'password123');
+
+      expect(api.lastPath, '/auth/register');
+      expect(api.lastBody, {
+        'email': 'user@example.com',
+        'password': 'password123',
+        'full_name': 'John Doe',
+      });
+    },
+  );
+
+  test(
+    'AuthService updateProfile posts full_name payload required by API',
+    () async {
+      final api = FakeApiService()
+        ..nextResponse = {
+          'data': {
+            'id': 'u1',
+            'email': 'user@example.com',
+            'full_name': 'John Doe',
+            'phone': '081234567890',
+          },
+        };
+      final service = AuthService(api: api);
+
+      final user = await service.updateProfile('John Doe', '081234567890');
+
+      expect(user.name, 'John Doe');
+      expect(api.lastPath, '/auth/profile');
+      expect(api.lastBody, {'full_name': 'John Doe', 'phone': '081234567890'});
+    },
+  );
+
   test('AuthProvider login saves token and clears loading state', () async {
     final api = FakeApiService()
       ..nextResponse = {
