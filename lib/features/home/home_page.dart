@@ -1,8 +1,8 @@
-// Purpose: Product catalog home page with search, category filter, sorting, and product grid.
+// Purpose: Product catalog home page with search, category filter, sorting, wishlist, and product grid.
 // Main callers: SplashPage, LoginPage.
-// Key dependencies: AuthProvider, CartProvider, ProductProvider, ProductCard, CartPage, OrderHistoryPage, ProductDetailPage, ProfilePage.
+// Key dependencies: AuthProvider, CartProvider, ProductProvider, WishlistProvider, ProductCard, CartPage, OrderHistoryPage, ProductDetailPage, ProfilePage, WishlistPage.
 // Main/public functions: HomePage.
-// Side effects: Fetches products/categories through ProductProvider and can trigger logout.
+// Side effects: Fetches products/categories, mutates wishlist, and can trigger logout.
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,10 +15,12 @@ import '../../core/widgets/product_card.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
+import '../../providers/wishlist_provider.dart';
 import '../cart/cart_page.dart';
 import '../order/order_history_page.dart';
 import '../product/product_detail_page.dart';
 import '../profile/profile_page.dart';
+import '../wishlist/wishlist_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -60,6 +62,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final productProvider = context.watch<ProductProvider>();
     final cartItems = context.watch<CartProvider>().totalItems;
+    final wishlist = context.watch<WishlistProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -86,6 +89,15 @@ class _HomePageState extends State<HomePage> {
               );
             },
             icon: const Icon(Icons.receipt_long_outlined),
+          ),
+          IconButton(
+            tooltip: 'Wishlist',
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const WishlistPage()));
+            },
+            icon: const Icon(Icons.favorite_border),
           ),
           IconButton(
             tooltip: 'Profil',
@@ -216,8 +228,8 @@ class _HomePageState extends State<HomePage> {
                     final product = productProvider.products[index];
                     return ProductCard(
                       product: product,
-                      isWishlisted: false,
-                      onWishlistTap: () {},
+                      isWishlisted: wishlist.isWishlisted(product.id),
+                      onWishlistTap: () => wishlist.toggleWishlist(product),
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(

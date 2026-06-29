@@ -1,8 +1,8 @@
-// Purpose: Product detail, review list, and review submission page.
+// Purpose: Product detail, wishlist toggle, review list, and review submission page.
 // Main callers: HomePage product card taps.
-// Key dependencies: CartProvider, ProductProvider, ProductModel, LoadingWidget, ErrorStateWidget, currency helper.
+// Key dependencies: CartProvider, ProductProvider, WishlistProvider, ProductModel, LoadingWidget, ErrorStateWidget, currency helper.
 // Main/public functions: ProductDetailPage.
-// Side effects: Fetches product detail/reviews and posts reviews through ProductProvider.
+// Side effects: Fetches product detail/reviews, posts reviews, mutates cart, and mutates local wishlist.
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +19,7 @@ import '../../core/widgets/loading_widget.dart';
 import '../../models/product_model.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
+import '../../providers/wishlist_provider.dart';
 
 class ProductDetailPage extends StatefulWidget {
   const ProductDetailPage({
@@ -100,10 +101,27 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ProductProvider>();
+    final wishlist = context.watch<WishlistProvider>();
     final product = provider.selectedProduct ?? widget.initialProduct;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail Produk')),
+      appBar: AppBar(
+        title: const Text('Detail Produk'),
+        actions: [
+          if (product != null)
+            IconButton(
+              tooltip: wishlist.isWishlisted(product.id)
+                  ? 'Hapus wishlist'
+                  : 'Tambah wishlist',
+              onPressed: () => wishlist.toggleWishlist(product),
+              icon: Icon(
+                wishlist.isWishlisted(product.id)
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+              ),
+            ),
+        ],
+      ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
